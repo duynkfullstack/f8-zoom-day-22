@@ -15,11 +15,12 @@ Cập nhật tháng 6 năm 2025
 #Lưu ý
 
 #Yêu cầu chung
--Tạo dự án mới với tên f8-zoom-day-22
 
--Tạo hai file: index.html và styles.css
+-   Tạo dự án mới với tên f8-zoom-day-22
 
--Sao chép H-TML và CSS từ nguồn: https://jsfiddle.net/w6p3vfu4/8/
+-   Tạo hai file: index.html và styles.css
+
+-   Sao chép H-TML và CSS từ nguồn: https://jsfiddle.net/w6p3vfu4/8/
 
 #Triển khai chức năng thêm task mới
 

@@ -1,110 +1,64 @@
 const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
 
-const modalAddTask = $(".add-btn ")
-const modalForm = $(".modal-overlay")
-const todoAppForm = $(".todo-app-form")
-const submitBtn = $(".btn-primary")
+const addBtn = $(".add-btn")
+const addTaskModal = $(".modal-overlay")
 const closeModal = $(".modal-close")
-const cancel = $(".btn-secondary")
-const todoTitle = $("#taskTitle")
-const todoDesc = $("#taskDescription")
-const todoCategory = $("#taskCategory")
-const todoPriority = $("#taskPriority")
-const todoStartTime = $("#startTime")
-const todoEndTime = $("#endTime")
-const todoTaskDate = $("#taskDate")
-const todoTaskColor = $("#taskColor")
-const taskCard = $(".task-card")
-const completeTask = $$(".complete")
-const taskGrid = $(".task-grid")
+const cancelModal = $(".btn-cancel")
+const taskTitle = $("#taskTitle")
+const todoAppForm = $(".todo-app-form")
 
-console.log(completeTask)
+console.log(todoList)
+
+// Mờ form
+function openForm() {
+    addTaskModal.className = "modal-overlay show"
+
+    // Tự động focus ô input đầu tiên
+    setTimeout(() => {
+        taskTitle.focus()
+    }, 1000)
+}
+
+addBtn.onclick = openForm
+
+// Thoát form
+function closeForm() {
+    addTaskModal.className = "modal-overlay"
+}
+
+closeModal.onclick = closeForm
+cancelModal.onclick = closeForm
 
 const todoTask = []
 
-console.log(todoTask)
+todoAppForm.onsubmit = function (e) {
+    e.preventDefault()
 
-// Open modal
-modalAddTask.onclick = function (event) {
-    modalForm.className = "modal-overlay show"
-
-    setTimeout(() => {
-        taskTitle.focus()
-    }, 10)
-}
-
-// close modal
-closeModal.onclick = function (event) {
-    modalForm.className = "modal-overlay"
-}
-
-cancel.onclick = function (event) {
-    modalForm.className = "modal-overlay"
-}
-
-todoAppForm.submit = function (event) {
-    event.preventDefault()
-}
-
-submitBtn.onclick = function (event) {
-    const newTask = {
-        taskTitle: todoTitle.value,
-        taskDesc: todoDesc.value,
-        taskCategory: todoCategory.value,
-        taskPriority: todoPriority.value,
-        taskStartTime: todoStartTime.value,
-        taskEndTime: todoEndTime.value,
-        taskDate: todoTaskDate.value,
-        taskColor: todoTaskColor.value,
-        isCompleted: false,
-    }
+    // Lấy ra toàn bộ dữ liệu của form và lưu vào newTask
+    const newTask = Object.fromEntries(new FormData(todoAppForm))
+    newTask.isComplete = false
 
     todoTask.unshift(newTask)
 
-    todoTitle.value = ""
-    todoTitle.focus()
-
-    renderTask(todoTask)
-
+    // reset form
     todoAppForm.reset()
-    modalForm.className = "modal-overlay"
+
+    // ẩn modal đi
+    closeForm()
+    //render
+    renderTask(todoTask)
 }
 
-// complete task
-taskGrid.onclick = function (e) {
-    const completeBtn = e.target.closest(".dropdown-item.complete")
-
-    if (completeBtn) {
-        const taskCard = completeBtn.closest(".task-card")
-        const isCompleted = taskCard.classList.toggle("completed")
-
-        if (isCompleted) {
-            completeBtn.innerHTML = `<i class="fa-solid fa-check fa-icon"></i> Mark as Active `
-        } else {
-            completeBtn.innerHTML = `<i class="fa-solid fa-check fa-icon"></i> Mark as Complete `
-        }
-    }
-}
-
-// Padding End Time
-function padTime(time) {
-    let hour = time.split(":")
-    if (hour < 12) {
-        return time.padEnd(8, " AM")
-    } else {
-        return time.padEnd(8, " PM")
-    }
-}
-
-// render
-function renderTask(todoTask) {
-    const htmlCard = todoTask
+function renderTask(tasks) {
+    const html = tasks
         .map(
-            (task) => `
-            <div class="task-card ${task.taskColor} ${task.isCompleted}">
+            (task) =>
+                `<div class="task-card ${task.color} ${
+                    task.isComplete ? "completed" : ""
+                }">
                 <div class="task-header">
-                    <h3 class="task-title">${task.taskTitle}</h3>
+                    <h3 class="task-title">${task.title}</h3>
                     <button class="task-menu">
                         <i class="fa-solid fa-ellipsis fa-icon"></i>
                         <div class="dropdown-menu">
@@ -117,6 +71,11 @@ function renderTask(todoTask) {
                             <div class="dropdown-item complete">
                                 <i class="fa-solid fa-check fa-icon"></i>
                                 Mark as Active
+                                ${
+                                    task.isComplete
+                                        ? "Mark as Active"
+                                        : "Mark as Complete"
+                                }
                             </div>
                             <div class="dropdown-item delete">
                                 <i class="fa-solid fa-trash fa-icon"></i>
@@ -126,22 +85,16 @@ function renderTask(todoTask) {
                     </button>
                 </div>
                 <p class="task-description">
-                    ${task.taskDesc}
+                    ${task.description}
                 </p>
-                <div class="task-time">${
-                    task.taskStartTime
-                        ? padTime(task.taskStartTime)
-                        : task.taskStartTime
-                } - ${
-                task.taskEndTime ? padTime(task.taskEndTime) : task.taskEndTime
-            }</div>
+                <div class="task-time">${task.startTime} - ${
+                    task.endTime
+                } PM</div>
             </div>`
         )
         .join("")
-    // console.log("hihi")
-    console.log(htmlCard)
-    const taskCard = $(".task-card")
-    taskCard.outerHTML = htmlCard
+    const todoList = $("#todoList")
+    todoList.innerHTML = html
 }
 
-renderTask(todoTask)
+renderTask()

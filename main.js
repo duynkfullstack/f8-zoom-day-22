@@ -8,8 +8,55 @@ const cancelModal = $(".btn-cancel")
 const taskTitle = $("#taskTitle")
 const todoAppForm = $(".todo-app-form")
 const todoList = $("#todoList")
+const searchInput = $(".search-input")
+const activeTask = $(".active-task")
+const completeTask = $(".complete-task")
+const allTask = $(".all-task")
+
+console.log(allTask)
 
 let editIndex = null
+
+// Tìm kiếm dựa vào dữ liệu nhập: oninput
+searchInput.oninput = function (e) {
+    const valueInput = e.target.value.trim().toLowerCase()
+
+    const taskFit = todoTask.filter((task) => {
+        return (
+            task.title.toLowerCase().includes(valueInput) ||
+            task.description.toLowerCase().includes(valueInput)
+        )
+    })
+
+    renderTask(taskFit)
+}
+
+// Phân loại task
+activeTask.onclick = function (e) {
+    const activeTasks = todoTask.filter((task) => task.isComplete === false)
+
+    allTask.className = "tab-button all-task"
+    activeTask.className = "tab-button active active-task"
+    completeTask.className = "tab-button complete-task"
+    renderTask(activeTasks)
+}
+
+completeTask.onclick = function (e) {
+    const completeTasks = todoTask.filter((task) => task.isComplete === true)
+
+    allTask.className = "tab-button all-task"
+    activeTask.className = "tab-button active-task"
+    completeTask.className = "tab-button active complete-task"
+    renderTask(completeTasks)
+}
+
+allTask.onclick = function (e) {
+    allTask.className = "tab-button active all-task"
+    activeTask.className = "tab-button active-task"
+    completeTask.className = "tab-button complete-task"
+
+    renderTask(todoTask)
+}
 
 // Mờ form
 function openForm() {
@@ -41,6 +88,10 @@ function closeForm() {
         delete submitBtn.dataset.original
     }
 
+    // Cuộn lên đầu form
+    addTaskModal.querySelector(".modal").scrollTop = 0
+
+    // reset form về giá trị mặc định
     todoAppForm.reset()
 
     editIndex = null
@@ -62,6 +113,19 @@ todoAppForm.onsubmit = function (e) {
     // Thực hiện logic sửa
     if (editIndex) {
         todoTask[editIndex] = formData
+        const currentTitle = todoTask[editIndex].title
+
+        const result = todoTask.filter((task, index) => {
+            return (
+                currentTitle.toLowerCase() === task.title.toLowerCase() &&
+                String(index) !== editIndex
+            )
+        })
+        console.log(result)
+        if (result.length !== 0) {
+            alert("Trùng công việc")
+        }
+
         // Nếu không có index, thực hiện mở modal thêm mới
         // Thực hiện logic thêm phần tử vào mảng và render ra giao diện
     } else {
@@ -71,8 +135,7 @@ todoAppForm.onsubmit = function (e) {
         todoTask.unshift(formData)
     }
 
-    // Lưu dữ liệu vào LocalStorage
-    localStorage.setItem("todoTasks", JSON.stringify(todoTask))
+    saveTask()
 
     // ẩn modal đi, khi ẩn sẽ reset form ở trong hàm closeForm
     closeForm()
@@ -80,8 +143,16 @@ todoAppForm.onsubmit = function (e) {
     renderTask(todoTask)
 }
 
+function saveTask() {
+    // Lưu dữ liệu vào LocalStorage
+    localStorage.setItem("todoTasks", JSON.stringify(todoTask))
+}
+
 todoList.onclick = function (e) {
     const editBtn = e.target.closest(".edit-btn")
+    const deleteBtn = e.target.closest(".delete-btn")
+    const completeBtn = e.target.closest(".complete-btn")
+
     if (editBtn) {
         const taskIndex = editBtn.dataset.index
         const task = todoTask[taskIndex]
@@ -108,11 +179,30 @@ todoList.onclick = function (e) {
 
         openForm()
     }
-}
-openForm()
+    // Xóa task
+    if (deleteBtn) {
+        const taskIndex = deleteBtn.dataset.index
+        const task = todoTask[taskIndex]
 
-function renderTask(tasks) {
-    const html = tasks
+        todoTask.splice(taskIndex, 1)
+
+        saveTask()
+        renderTask(todoTask)
+    }
+
+    if (completeBtn) {
+        const taskIndex = completeBtn.dataset.index
+        const task = todoTask[taskIndex]
+
+        task.isComplete = !task.isComplete
+
+        saveTask()
+        renderTask(todoTask)
+    }
+}
+
+function renderTask(taskList) {
+    const html = taskList
         .map(
             (task, index) =>
                 `<div class="task-card ${task.color} ${
@@ -129,7 +219,7 @@ function renderTask(tasks) {
                                 ></i>
                                 Edit
                             </div>
-                            <div class="dropdown-item complete">
+                            <div class="dropdown-item complete complete-btn" data-index=${index}>
                                 <i class="fa-solid fa-check fa-icon"></i>
                                 ${
                                     task.isComplete
@@ -137,7 +227,7 @@ function renderTask(tasks) {
                                         : "Mark as Complete"
                                 }
                             </div>
-                            <div class="dropdown-item delete">
+                            <div class="dropdown-item delete delete-btn" data-index="${index}">
                                 <i class="fa-solid fa-trash fa-icon"></i>
                                 Delete
                             </div>
@@ -157,8 +247,3 @@ function renderTask(tasks) {
 }
 // render lần đầu, để lấy dữ liệu hiển thị ra giao diện
 renderTask(todoTask)
-
-const taskCard = $(".task-card")
-const complete = $(".complete")
-
-console.log(complete)

@@ -28,34 +28,10 @@ searchInput.oninput = function (e) {
         )
     })
 
-    renderTask(taskFit)
-}
-
-// Phân loại task
-activeTask.onclick = function (e) {
-    const activeTasks = todoTask.filter((task) => task.isComplete === false)
-
-    allTask.className = "tab-button all-task"
-    activeTask.className = "tab-button active active-task"
-    completeTask.className = "tab-button complete-task"
-    renderTask(activeTasks)
-}
-
-completeTask.onclick = function (e) {
-    const completeTasks = todoTask.filter((task) => task.isComplete === true)
-
-    allTask.className = "tab-button all-task"
-    activeTask.className = "tab-button active-task"
-    completeTask.className = "tab-button active complete-task"
-    renderTask(completeTasks)
-}
-
-allTask.onclick = function (e) {
     allTask.className = "tab-button active all-task"
     activeTask.className = "tab-button active-task"
     completeTask.className = "tab-button complete-task"
-
-    renderTask(todoTask)
+    renderTask(taskFit)
 }
 
 // Mờ form
@@ -100,7 +76,7 @@ function closeForm() {
 closeModal.onclick = closeForm
 cancelModal.onclick = closeForm
 
-const todoTask = JSON.parse(localStorage.getItem("todoTasks"))
+const todoTask = JSON.parse(localStorage.getItem("todoTasks")) || []
 console.log(todoTask)
 
 todoAppForm.onsubmit = function (e) {
@@ -112,9 +88,7 @@ todoAppForm.onsubmit = function (e) {
     // Nếu có index thực hiện mở modal sửa
     // Thực hiện logic sửa
     if (editIndex) {
-        todoTask[editIndex] = formData
-        const currentTitle = todoTask[editIndex].title
-
+        const currentTitle = taskTitle.value
         const result = todoTask.filter((task, index) => {
             return (
                 currentTitle.toLowerCase() === task.title.toLowerCase() &&
@@ -124,6 +98,9 @@ todoAppForm.onsubmit = function (e) {
         console.log(result)
         if (result.length !== 0) {
             alert("Trùng công việc")
+            return
+        } else {
+            todoTask[editIndex] = formData
         }
 
         // Nếu không có index, thực hiện mở modal thêm mới
@@ -131,6 +108,17 @@ todoAppForm.onsubmit = function (e) {
     } else {
         // Mặc định là task chưa hoàn thành
         formData.isComplete = false
+        const result = todoTask.filter((task, index) => {
+            return (
+                taskTitle.value === task.title.toLowerCase() &&
+                String(index) !== editIndex
+            )
+        })
+        console.log(result)
+        if (result.length !== 0) {
+            alert("Trùng công việc")
+            return
+        }
 
         todoTask.unshift(formData)
     }
@@ -147,6 +135,8 @@ function saveTask() {
     // Lưu dữ liệu vào LocalStorage
     localStorage.setItem("todoTasks", JSON.stringify(todoTask))
 }
+
+function completeTick(element) {}
 
 todoList.onclick = function (e) {
     const editBtn = e.target.closest(".edit-btn")
@@ -190,15 +180,48 @@ todoList.onclick = function (e) {
         renderTask(todoTask)
     }
 
+    // Đánh dấu hoàn thành
     if (completeBtn) {
         const taskIndex = completeBtn.dataset.index
         const task = todoTask[taskIndex]
 
         task.isComplete = !task.isComplete
 
+        allTask.className = "tab-button active all-task"
+        activeTask.className = "tab-button active-task"
+        completeTask.className = "tab-button complete-task"
+
         saveTask()
         renderTask(todoTask)
     }
+}
+
+// Phân loại task
+
+activeTask.onclick = function (e) {
+    const activeTasks = todoTask.filter((task) => task.isComplete === false)
+
+    allTask.className = "tab-button all-task"
+    activeTask.className = "tab-button active active-task"
+    completeTask.className = "tab-button complete-task"
+
+    renderTask(activeTasks)
+}
+
+completeTask.onclick = function (e) {
+    todoList.onclick = function (e) {
+        const completeBtn = e.target.closest(".complete-btn")
+        if (completeBtn) {
+            completeTick(completeBtn)
+        }
+    }
+    const completeTasks = todoTask.filter((task) => task.isComplete === true)
+
+    // Tô sáng tab hiện tại
+    allTask.className = "tab-button all-task"
+    activeTask.className = "tab-button active-task"
+    completeTask.className = "tab-button active complete-task"
+    renderTask(completeTasks)
 }
 
 function renderTask(taskList) {

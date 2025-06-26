@@ -89,3 +89,38 @@ isCompleted (mặc định là false) - Khởi tạo mảng todoTasks = []
 -   Khi refresh trang (F5), dữ liệu sẽ bị mất do biến todoTasks chỉ tồn tại trong memory của tab hiện tại (biến toàn cục)
 
 . Hiện tại chưa cần xử lý các trường hợp lưu trữ khác, chúng ta sẽ hoàn thiện tính năng này trong các bài học tiếp theo.
+
+-   Day 23:
+
+Yêu cầu chung:
+
+-   Vẫn sửa vào Git repo buổi học trước, commit thêm và push.
+-   Xem lại video record: https://youtu.be/GeUdpEyQZqY
+
+Bài 1: Tự học chương 34 từ bài 34.34 - 34-45
+Bài 2: Phát triển tiếp dự án Todo App
+
+-   Triển khai chức năng lọc theo: Tất cả tasks, tasks chưa hoàn thành, tasks đã hoàn thành (UI cho sẵn buttons rồi). ✅
+    Note: Đang ở tab đang hoàn thành mà đánh dấu chưa hoàn thành đang bị lỗi
+-   Triển khai chức năng tìm kiếm: Khi gõ vào ô search thì lọc ra các tasks có title hoặc description chứa từ khóa, lọc ngay trên danh sách chính. Nếu không có tasks khớp với từ khóa, hiển thị message không tìm thấy. Khi xóa từ khóa khỏi ô search, hiển thị lại danh sách gốc. Khi tìm, tự động chuyển về chế độ lọc "Tất cả tasks" (VD đang lọc ở "các tasks đã xong", thì khi bắt đầu tìm tự chuyển về tất cả).
+-   Check trùng tiêu đề (title) và đưa ra cảnh báo khi thêm task và sửa task.
+
+Deadline: Trước buổi học sau, phần học trên hệ thống (chương 34) có thể ưu tiên sau. Link nộp bài: https://short.f8team.dev/q5e2xjvd
+
+Day 24:
+
+Yêu cầu chung:
+
+-   Làm tiếp vào repo bài tập buổi trước.
+-   Commit và push code lên sau đó nộp bài bằng Github Repo & Pages.
+
+Yêu cầu bài tập:
+
+1. Hoàn thành từ bài 34.37 - 34.69 (Lưu ý rất nhiều nội dung đã học, bạn có thể next nếu đã nắm chắc).
+2. Phòng tránXSS cho bàih tập todo bằng 1 trong 2 cách: createElement + textContent (1) hoặc viết hàm escapeHTML (2).
+3. Sửa lại code Todo App sử dụng các kiến thức mới học. VD: đóng mở modal bằng classList.toggle(), ...
+4. Tham khảo video này (https://youtu.be/7c7ABhaQJGM) và áp dụng Toast Message vào Todo App (thêm, sửa, xóa... thành công).
+5. Hoàn thành các flashcards mới (nếu có).
+
+Deadline: Trước buổi học sau.
+Nộp bài tại: https://short.f8team.dev/bfny3h8c

@@ -13,12 +13,10 @@ const activeTask = $(".active-task")
 const completeTask = $(".complete-task")
 const allTask = $(".all-task")
 
-console.log(allTask)
-
 let editIndex = null
 
 // Tìm kiếm dựa vào dữ liệu nhập: oninput
-searchInput.oninput = function (e) {
+searchInput.addEventListener("input", function (e) {
     const valueInput = e.target.value.trim().toLowerCase()
 
     const taskFit = todoTask.filter((task) => {
@@ -28,15 +26,15 @@ searchInput.oninput = function (e) {
         )
     })
 
-    allTask.className = "tab-button active all-task"
-    activeTask.className = "tab-button active-task"
-    completeTask.className = "tab-button complete-task"
+    allTask.classList.add("active")
+    activeTask.classList.remove("active")
+    completeTask.classList.remove("active")
     renderTask(taskFit)
-}
+})
 
 // Mờ form
 function openForm() {
-    addTaskModal.className = "modal-overlay show"
+    addTaskModal.classList.add("show")
 
     // Tự động focus ô input đầu tiên
     setTimeout(() => {
@@ -44,11 +42,12 @@ function openForm() {
     }, 1000)
 }
 
-addBtn.onclick = openForm
+addBtn.addEventListener("click", openForm)
 
 // Thoát form
 function closeForm() {
-    addTaskModal.className = "modal-overlay"
+    // Sử dụng toggle để bật tắt form
+    addTaskModal.classList.toggle("show")
 
     const formTitle = addTaskModal.querySelector(".modal-title")
     if (formTitle) {
@@ -73,13 +72,13 @@ function closeForm() {
     editIndex = null
 }
 
-closeModal.onclick = closeForm
-cancelModal.onclick = closeForm
+closeModal.addEventListener("click", closeForm)
+cancelModal.addEventListener("click", closeForm)
 
 const todoTask = JSON.parse(localStorage.getItem("todoTasks")) || []
 console.log(todoTask)
 
-todoAppForm.onsubmit = function (e) {
+todoAppForm.addEventListener("submit", function (e) {
     e.preventDefault()
 
     // Lấy ra toàn bộ dữ liệu của form và lưu vào formData
@@ -97,7 +96,7 @@ todoAppForm.onsubmit = function (e) {
         })
         console.log(result)
         if (result.length !== 0) {
-            alert("Trùng công việc")
+            showErrorToast()
             return
         } else {
             todoTask[editIndex] = formData
@@ -116,7 +115,7 @@ todoAppForm.onsubmit = function (e) {
         })
         console.log(result)
         if (result.length !== 0) {
-            alert("Trùng công việc")
+            showErrorToast()
             return
         }
 
@@ -124,21 +123,20 @@ todoAppForm.onsubmit = function (e) {
     }
 
     saveTask()
+    showSuccessToastAddNew()
 
     // ẩn modal đi, khi ẩn sẽ reset form ở trong hàm closeForm
     closeForm()
     //render
     renderTask(todoTask)
-}
+})
 
 function saveTask() {
     // Lưu dữ liệu vào LocalStorage
     localStorage.setItem("todoTasks", JSON.stringify(todoTask))
 }
 
-function completeTick(element) {}
-
-todoList.onclick = function (e) {
+todoList.addEventListener("click", function (e) {
     const editBtn = e.target.closest(".edit-btn")
     const deleteBtn = e.target.closest(".delete-btn")
     const completeBtn = e.target.closest(".complete-btn")
@@ -174,6 +172,7 @@ todoList.onclick = function (e) {
         const taskIndex = deleteBtn.dataset.index
         const task = todoTask[taskIndex]
 
+        showSuccessToastDelete()
         todoTask.splice(taskIndex, 1)
 
         saveTask()
@@ -187,52 +186,53 @@ todoList.onclick = function (e) {
 
         task.isComplete = !task.isComplete
 
-        allTask.className = "tab-button active all-task"
-        activeTask.className = "tab-button active-task"
-        completeTask.className = "tab-button complete-task"
+        allTask.classList.add("active")
+        activeTask.classList.remove("active")
+        completeTask.classList.remove("active")
 
         saveTask()
         renderTask(todoTask)
     }
-}
+})
 
 // Phân loại task
 
-activeTask.onclick = function (e) {
+allTask.addEventListener("click", function (e) {
+    allTask.classList.add("active")
+    activeTask.classList.remove("active")
+    completeTask.classList.remove("active")
+
+    renderTask(todoTask)
+})
+
+activeTask.addEventListener("click", function (e) {
     const activeTasks = todoTask.filter((task) => task.isComplete === false)
 
-    allTask.className = "tab-button all-task"
-    activeTask.className = "tab-button active active-task"
-    completeTask.className = "tab-button complete-task"
-
+    allTask.classList.remove("active")
+    activeTask.classList.add("active")
+    completeTask.classList.remove("active")
     renderTask(activeTasks)
-}
+})
 
-completeTask.onclick = function (e) {
-    todoList.onclick = function (e) {
-        const completeBtn = e.target.closest(".complete-btn")
-        if (completeBtn) {
-            completeTick(completeBtn)
-        }
-    }
+completeTask.addEventListener("click", function (e) {
     const completeTasks = todoTask.filter((task) => task.isComplete === true)
 
     // Tô sáng tab hiện tại
-    allTask.className = "tab-button all-task"
-    activeTask.className = "tab-button active-task"
-    completeTask.className = "tab-button active complete-task"
+    allTask.classList.remove("active")
+    activeTask.classList.remove("active")
+    completeTask.classList.add("active")
     renderTask(completeTasks)
-}
+})
 
 function renderTask(taskList) {
     const html = taskList
         .map(
             (task, index) =>
-                `<div class="task-card ${task.color} ${
+                `<div class="task-card ${escapeHTML(task.color)} ${
                     task.isComplete ? "completed" : ""
                 }">
                 <div class="task-header">
-                    <h3 class="task-title">${task.title}</h3>
+                    <h3 class="task-title">${escapeHTML(task.title)}</h3>
                     <button class="task-menu">
                         <i class="fa-solid fa-ellipsis fa-icon"></i>
                         <div class="dropdown-menu">
@@ -258,11 +258,11 @@ function renderTask(taskList) {
                     </button>
                 </div>
                 <p class="task-description">
-                    ${task.description}
+                    ${escapeHTML(task.description)}
                 </p>
-                <div class="task-time">${task.startTime} - ${
-                    task.endTime
-                } PM</div>
+                <div class="task-time">${escapeHTML(
+                    task.startTime
+                )} - ${escapeHTML(task.endTime)} PM</div>
             </div>`
         )
         .join("")
@@ -270,3 +270,95 @@ function renderTask(taskList) {
 }
 // render lần đầu, để lấy dữ liệu hiển thị ra giao diện
 renderTask(todoTask)
+
+function escapeHTML(html) {
+    const div = document.createElement("div")
+    div.textContent = html
+    return div.innerHTML
+}
+
+// Toast Message
+
+function toast({ title = "", message = "", type = "info", duration = 3000 }) {
+    const toastElement = document.querySelector("#toast")
+    console.log(toastElement)
+    if (toastElement) {
+        const toast = document.createElement("div")
+
+        // Auto remove toast
+        const autoRemoveId = setTimeout(function () {
+            toastElement.removeChild(toast)
+        }, duration + 1000)
+
+        // Remove toast when clicked
+        toast.onclick = function (e) {
+            if (e.target.closest(".toast__close")) {
+                toastElement.removeChild(toast)
+                clearTimeout(autoRemoveId)
+            }
+        }
+
+        const icons = {
+            success: "fas fa-check-circle",
+            info: "fas fa-info-circle",
+            warning: "fas fa-exclamation-circle",
+            error: "fas fa-exclamation-circle",
+        }
+        const icon = icons[type]
+        const delay = (duration / 1000).toFixed(2)
+
+        toast.classList.add("toast", `toast--${type}`)
+        toast.style.animation = `slideInLeft ease .3s, fadeOut linear 1s ${delay}s forwards`
+
+        toast.innerHTML = `
+                    <div class="toast__icon">
+                        <i class="${icon}"></i>
+                    </div>
+                    <div class="toast__body">
+                        <h3 class="toast__title">${title}</h3>
+                        <p class="toast__msg">${message}</p>
+                    </div>
+                    <div class="toast__close">
+                        <i class="fas fa-times"></i>
+                    </div>
+                `
+        toastElement.appendChild(toast)
+    }
+}
+
+// Hàm show success và Error
+function showSuccessToastEdit() {
+    toast({
+        title: "Sửa một công việc",
+        message: "Bạn đã sửa thành công một công việc.",
+        type: "success",
+        duration: 5000,
+    })
+}
+
+function showErrorToast() {
+    toast({
+        title: "Trùng công việc",
+        message: "Công việc này đã có trong danh sách.",
+        type: "error",
+        duration: 5000,
+    })
+}
+
+function showSuccessToastAddNew() {
+    toast({
+        title: "Thêm công việc mới",
+        message: "Đã thêm một công việc vào danh sách.",
+        type: "success",
+        duration: 5000,
+    })
+}
+
+function showSuccessToastDelete() {
+    toast({
+        title: "Xóa một công việc",
+        message: "Đã xóa một công việc khỏi danh sách.",
+        type: "success",
+        duration: 5000,
+    })
+}
